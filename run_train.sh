@@ -1,0 +1,13 @@
+CUDA_VISIBLE_DEVICES=0,1,2,3 python submitit_pretrain.py \
+    --nodes 1 \
+    --ngpus 4 \
+    --use_volta32 \
+    --batch_size 128 \
+    --model mae_vit_base_patch16 \
+    --norm_pix_loss \
+    --mask_ratio 0.75 \
+    --epochs 400 \
+    --warmup_epochs 20 \
+    --blr 1.5e-4 \
+    --weight_decay 0.05 \
+    --data_path /remote-home/mae/Data/combined_images
