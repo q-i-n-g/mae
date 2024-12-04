@@ -127,6 +127,6 @@ source_directory = "Data"
 target_directory = "Data/combined_images"  
 final_directory = "Data/final_images"
 
-# combine_images(source_directory, target_directory)
-# train_val_split(target_directory)
+combine_images(source_directory, target_directory)
+train_val_split(target_directory)
 resize_images(target_directory, final_directory, 224)
