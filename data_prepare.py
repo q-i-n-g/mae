@@ -1,7 +1,8 @@
 import os
 import shutil
 from pathlib import Path
-
+from PIL import Image
+import numpy as np
 def combine_images(source_dir, target_dir):
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
@@ -70,8 +71,62 @@ def train_val_split(target_dir):
     print(f"训练集: {len(train_files)} 张图片")
     print(f"验证集: {len(val_files)} 张图片")
 
+
+def center_crop_arr(pil_image, image_size):
+    """
+    Center cropping implementation from ADM.
+    https://github.com/openai/guided-diffusion/blob/8fb3ad9197f16bbc40620447b2742e13458d2831/guided_diffusion/image_datasets.py#L126
+    """
+    # Create a new black image with size 2 * image_size
+    new_size = 2 * image_size
+    new_image = Image.new('RGB', (new_size, new_size), (0, 0, 0))
+
+    # Calculate the position to paste the original image at the center
+    left = (new_size - pil_image.width) // 2
+    top = (new_size - pil_image.height) // 2
+    new_image.paste(pil_image, (left, top))
+
+    pil_image = new_image
+    while min(*pil_image.size) >= 2 * image_size:
+        pil_image = pil_image.resize(
+            tuple(x // 2 for x in pil_image.size), resample=Image.BOX
+        )
+
+    scale = image_size / min(*pil_image.size)
+    pil_image = pil_image.resize(
+        tuple(round(x * scale) for x in pil_image.size), resample=Image.BICUBIC
+    )
+
+    arr = np.array(pil_image)
+    crop_y = (arr.shape[0] - image_size) // 2
+    crop_x = (arr.shape[1] - image_size) // 2
+    return Image.fromarray(arr[crop_y: crop_y + image_size, crop_x: crop_x + image_size])
+
+def resize_images(source_dir, target_dir, size):
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+    
+    for root, dirs, files in os.walk(source_dir):
+        # 获取相对路径，用于在目标目录中创建相同的目录结构
+        relative_path = os.path.relpath(root, source_dir)
+        target_path = os.path.join(target_dir, relative_path)
+        
+        # 确保目标子目录存在
+        if not os.path.exists(target_path):
+            os.makedirs(target_path)
+            
+        for file in files:
+            if file.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp')):
+                image = Image.open(os.path.join(root, file))
+                resized_image = center_crop_arr(image, size)
+                # 保存到对应的子目录中
+                resized_image.save(os.path.join(target_path, file))
+                print(f"已处理: {os.path.join(relative_path, file)}")
+
 source_directory = "Data" 
 target_directory = "Data/combined_images"  
+final_directory = "Data/final_images"
 
-combine_images(source_directory, target_directory)
-train_val_split(target_directory)
+# combine_images(source_directory, target_directory)
+# train_val_split(target_directory)
+resize_images(target_directory, final_directory, 224)

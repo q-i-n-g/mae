@@ -14,7 +14,7 @@ from pathlib import Path
 
 import main_pretrain as trainer
 import submitit
-
+from tqdm import tqdm
 
 def parse_args():
     trainer_parser = trainer.get_args_parser()
@@ -32,9 +32,9 @@ def parse_args():
 
 def get_shared_folder() -> Path:
     user = os.getenv("USER")
-    if Path("/remote-home/mae/checkpoint/").is_dir():
-        p = Path(f"/remote-home/mae/checkpoint/{user}/experiments")
-        p.mkdir(exist_ok=True)
+    if Path("/fdudata/qyliu/mae/checkpoint/").is_dir():
+        p = Path(f"/fdudata/qyliu/mae/checkpoint/{user}/experiments")
+        os.makedirs(p, exist_ok=True)
         return p
     raise RuntimeError("No shared folder available")
 
