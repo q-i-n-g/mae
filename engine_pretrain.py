@@ -16,7 +16,7 @@ import torch
 
 import util.misc as misc
 import util.lr_sched as lr_sched
-
+import pdb
 
 def train_one_epoch(model: torch.nn.Module,
                     data_loader: Iterable, optimizer: torch.optim.Optimizer,
@@ -43,7 +43,7 @@ def train_one_epoch(model: torch.nn.Module,
             lr_sched.adjust_learning_rate(optimizer, data_iter_step / len(data_loader) + epoch, args)
 
         samples = samples.to(device, non_blocking=True)
-
+        pdb.set_trace()
         with torch.amp.autocast('cuda'):
             loss, _, _ = model(samples, mask_ratio=args.mask_ratio)
 

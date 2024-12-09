@@ -34,7 +34,7 @@ import models_mae
 
 from engine_pretrain import train_one_epoch
 from tqdm import tqdm
-
+import pdb
 def get_args_parser():
     parser = argparse.ArgumentParser('MAE pre-training', add_help=False)
     parser.add_argument('--batch_size', default=64, type=int,
@@ -156,9 +156,11 @@ def main(args):
     
     # define the model
     model = models_mae.__dict__[args.model](norm_pix_loss=args.norm_pix_loss)
-
+    chkpt_dir = 'output_dir/checkpoint-399.pth'
+    checkpoint = torch.load(chkpt_dir, map_location='cpu')
+    msg = model.load_state_dict(checkpoint['model'], strict=False)
     model.to(device)
-
+    pdb.set_trace()
     model_without_ddp = model
     print("Model = %s" % str(model_without_ddp))
 
